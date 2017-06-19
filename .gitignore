@@ -3,3 +3,6 @@ _build/
 
 # Ignore dependencies:
 Libs/
+
+# Ignore .txt (for CMakeLists.txt files)
+*.txt
