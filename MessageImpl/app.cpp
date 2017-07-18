@@ -8,7 +8,7 @@
 
 int main()
 {
-	// In this example it would not be necessary, but usually we're going to use polymorphism when handling messages
+	//// In this example it would not be necessary, but usually we're going to use polymorphism when handling messages
 	MessageSystems::DynamicMessage* dM = (MessageSystems::DynamicMessage*)new MessageSystems::ExampleMessage("Hello, ");
 
 	MessageSystems::VariantMessage vM;
@@ -18,7 +18,9 @@ int main()
 	// This is the tricky thing. When using this variant approach, if you are using strings identifiers for the arguments,
 	// you must check first if that argument exist and the identifier is correct.
 	assert(vM.existArg("argId"));
-	std::cout << ((MessageSystems::ExampleMessage*) dM)->stringArg << (vM.existArg("argId") ? vM.getArg<std::string>("argId") : "") << std::endl;
+	std::cout << /*((MessageSystems::ExampleMessage*) dM)->stringArg <<*/ (vM.existArg("argId") ? vM.getArg<std::string>("argId") : "") << std::endl;
+
+	delete dM;
 
 	return 0;
 }
