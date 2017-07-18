@@ -7,7 +7,7 @@ find_package(Boost 1.64.0)
 if(Boost_FOUND)
   	include_directories(${Boost_INCLUDE_DIRS})
   	  
-  	file(GLOB SOURCES "./*.cpp")
+  	file(GLOB SOURCES "./*.cpp" "./*.h")
 	add_executable(directDelivery ${SOURCES})
 else()
     message(STATUS "Fail to load Boost!!")

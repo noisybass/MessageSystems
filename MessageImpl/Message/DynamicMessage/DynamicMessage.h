@@ -10,7 +10,7 @@ namespace MessageSystems
 	public:
 		MessageType type;
 
-		virtual ~DynamicMessage() {}
+		virtual ~DynamicMessage() = default;
 
 	protected:
 		DynamicMessage() : type(MessageType::DEFAULT) {}
