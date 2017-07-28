@@ -7,10 +7,7 @@
 
 namespace MessageSystems
 {
-	// For the purpouse of this example I am implementing the acceptMessage
-	// and handleMessage functions in Component class, but usually we will 
-	// have to do this in the derived classes. Component should be an abstract class.
-	class Component : Listener
+	class Component : public Listener
 	{
 	public:
 		Component() = default;
