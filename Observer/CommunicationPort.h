@@ -13,9 +13,8 @@ namespace MessageSystems
 		template<typename Object, void (Object::*Method)(const Message& m)>
 		void addObserver(MessageType type, Object* observer)
 		{
-			Communication com{ type, observer, this, &invoke<Object, Method> };
-			_coms.push_back(com);
-			observer->_coms.push_back(com);
+			addCommunication(new Communication{ type, observer, this, &invoke<Object, Method> });
+			observer->addCommunication(new Communication{ type, observer, this, &invoke<Object, Method> });
 		}
 
 		template<typename Object, void (Object::*Method)(const Message& m)>
@@ -23,23 +22,8 @@ namespace MessageSystems
 		{
 			Handler handler = &invoke<Object, Method>;
 
-			auto it = _coms.begin();
-			while (it != _coms.end())
-			{
-				if (it->type == type && it->observer == observer && it->handler == handler)
-					it = _coms.erase(it);
-				else
-					++it;
-			}
-
-			it = observer->_coms.begin();
-			while (it != observer->_coms.end())
-			{
-				if (it->type == type && it->observer == observer && it->handler == handler)
-					it = observer->_coms.erase(it);
-				else
-					++it;
-			}
+			removeObserver(type, observer, handler);
+			observer->removeObserver(type, observer, handler);
 		}
 
 		void sendMessage(const Message& m);
@@ -53,12 +37,13 @@ namespace MessageSystems
 			CommunicationPort* observer;
 			CommunicationPort* subject;
 			Handler handler;
+			Communication* next;
 
 			Communication(MessageType t, CommunicationPort* obs, CommunicationPort* sub, Handler h) :
-				type{ t }, observer{ obs }, subject{ sub }, handler{ h } {}
+				type{ t }, observer{ obs }, subject{ sub }, handler{ h }, next{ nullptr } {}
 		};
 
-		std::vector<Communication> _coms;
+		Communication* _coms = nullptr;
 
 		void stopCommunication(const CommunicationPort* port);
 
@@ -66,6 +51,34 @@ namespace MessageSystems
 		static void invoke(CommunicationPort* observer, const Message& m)
 		{
 			(static_cast<Object*>(observer)->*Method)(m);
+		}
+
+		void addCommunication(Communication* com);
+		void removeObserver(MessageType type, CommunicationPort* observer, Handler handler)
+		{
+			if (_coms->type == type && _coms->observer == observer && _coms->handler == handler)
+			{
+				Communication* aux = _coms->next;
+				_coms->next = nullptr;
+				_coms = aux;
+			}
+			else
+			{
+				Communication* current = _coms;
+				bool found = false;
+				while (!found && current->next)
+				{
+					if (current->next->type == type && current->next->observer == observer && current->next->handler == handler)
+					{
+						Communication* aux = current->next->next;
+						current->next->next = nullptr;
+						current->next = aux;
+						found = true;
+					}
+					else
+						current = current->next;
+				}
+			}
 		}
 	};
 

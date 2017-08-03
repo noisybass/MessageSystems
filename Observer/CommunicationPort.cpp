@@ -4,34 +4,66 @@ namespace MessageSystems
 {
 	CommunicationPort::~CommunicationPort()
 	{
-		while (!_coms.empty())
+		Communication* current = _coms;
+		while (current)
 		{
-			Communication com = _coms.back();
-			_coms.pop_back();
-			com.observer->stopCommunication(this);
-			com.subject->stopCommunication(this);
+			current->observer->stopCommunication(this);
+			//current->subject->stopCommunication(this);
+			current = current->next;
+		}
+		
+		while (_coms)
+		{
+			Communication* aux = _coms->next;
+			_coms->next = nullptr;
+			_coms = aux;
 		}
 	}
 
 	void CommunicationPort::stopCommunication(const CommunicationPort* port)
 	{
-		auto it = _coms.begin();
-		while (it != _coms.end())
+		if (_coms->observer == port || _coms->subject == port)
 		{
-			if (it->observer == port || it->subject == port)
-				it = _coms.erase(it);
-			else
-				++it;
+			Communication* aux = _coms->next;
+			_coms->next = nullptr;
+			_coms = aux;
+
+		}
+
+		if (_coms)
+		{
+			Communication* current = _coms;
+			while (current->next)
+			{
+				if (current->next->observer == port || current->next->subject == port)
+				{
+					Communication* aux = current->next->next;
+					current->next->next = nullptr;
+					current->next = aux;
+				}
+				else
+					current = current->next;
+			}
 		}
 	}
 
 	void CommunicationPort::sendMessage(const Message& m)
 	{
-		for (Communication com : _coms)
+		Communication* current = _coms;
+		while (current)
 		{
-			if (com.type == m.type)
-				com.handler(com.observer, m);
+			if (current->type == m.type)
+			{
+				current->handler(current->observer, m);
+			}
+			current = current->next;
 		}
+	}
+
+	void CommunicationPort::addCommunication(Communication* com)
+	{
+		com->next = _coms;
+		_coms = com;
 	}
 
 } // namespace MessageSystems
